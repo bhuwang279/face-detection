@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,9 +24,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '(!pn*%hnd&s%mh8kcy3%xn5bsuay1za$z-yb#xut&tpnl6&rj%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['43.230.208.71']
+ALLOWED_HOSTS = []
 
 PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -53,15 +54,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'face_compare_api.urls'
 
-#
-# CELERY = {
-#     'BROKER_URL': os.environ['CELERY_BROKER'],
-#     'CELERY_IMPORTS': ('apps.api.tasks', ),
-#     'CELERY_TASK_SERIALIZER': 'json',
-#     'CELERY_RESULT_BACKEND': os.environ['CELERY_RESULT_BACKEND'],
-#     'CELERY_RESULT_SERIALIZER': 'json',
-#     'CELERY_ACCEPT_CONTENT': ['json'],
-# }
 
 TEMPLATES = [
     {
@@ -81,20 +73,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'face_compare_api.wsgi.application'
 
-
-########## DATABASE CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql_psycopg2'),
-#         'NAME': os.getenv('DATABASE_NAME', ''),
-#         'USER': os.getenv('DATABASE_USER', ''),
-#         'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
-#         'HOST': os.getenv('DATABASE_SERVICE_HOST', ''),
-#         'PORT': os.getenv('DATABASE_SERVICE_PORT', 5432)
-#     }
-# }
-########## END DATABASE CONFIGURATION
+DATABASES = {
+    "default": dj_database_url.config(
+        default="postgres://covid:f1ghtC0vid@localhost:5432/covid-face", conn_max_age=600
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

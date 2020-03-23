@@ -17,6 +17,4 @@ def compare_images(self, *args, **kwargs):
 
     results = face_recognition.compare_faces([base_face_encoding], current_face_encoding)
 
-    print(results)
-
     return results[0]
