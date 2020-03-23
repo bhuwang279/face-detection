@@ -67,7 +67,7 @@ def compare_images(self, *args, **kwargs):
 
     results = face_recognition.compare_faces([base_face_encoding], current_face_encoding, 0.4)
 
-    return results[0]
+    return results
 
 
 class Image(APIView):
@@ -86,4 +86,4 @@ class Image(APIView):
         if not result:
             return Response({"status": "Failed", "message": "Base Image Missing",  "code": "03"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": result}, status=status.HTTP_202_ACCEPTED)
+        return Response({"success": result[0]}, status=status.HTTP_202_ACCEPTED)
