@@ -26,7 +26,7 @@ SECRET_KEY = '(!pn*%hnd&s%mh8kcy3%xn5bsuay1za$z-yb#xut&tpnl6&rj%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['43.230.208.71']
+ALLOWED_HOSTS = []
 
 PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -73,11 +73,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'face_compare_api.wsgi.application'
 
-# DATABASES = {
-#     "default": dj_database_url.config(
-#         default="postgres://bgurung:f1ghtC0vid@localhost:5432/covid_face", conn_max_age=600
-#     )
-# }
+DATABASES = {
+    "default": dj_database_url.config(
+        default="postgres://akbar:P@ssw0rd@localhost:5432/covid_face", conn_max_age=600
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
