@@ -6,9 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.files.storage import default_storage
-from django.shortcuts import get_object_or_404
 import os
-
 from django.conf import settings
 from .models import RegisteredFaces
 
@@ -52,10 +50,15 @@ def compare_images(self, *args, **kwargs):
     if image is None:
 
         if 'base_image' not in request.FILES:
-            return  False
+            return "MISSING BASE IMAGE"
 
         base_image_file = kwargs.get("request").FILES['base_image']
         base_face = face_recognition.load_image_file(base_image_file)
+        base_face_loc = face_recognition.face_locations(base_face)
+
+        if len(base_face_loc) != 1:
+            return "MISSING FACE IN BASE IMAGE"
+
         base_face_encoding = face_recognition.face_encodings(base_face)[0]
         save_base_image(kwargs.get("request"), base_face_encoding)
     else:
@@ -63,11 +66,14 @@ def compare_images(self, *args, **kwargs):
 
     current_image_file = kwargs.get("request").FILES['current_image']
     current_face = face_recognition.load_image_file(current_image_file)
+    current_face_loc = face_recognition.face_locations(current_face)
+    if len(current_face_loc) != 1:
+        return "MISSING FACE IN CURRENT IMAGE"
     current_face_encoding = face_recognition.face_encodings(current_face)[0]
 
     results = face_recognition.compare_faces([base_face_encoding], current_face_encoding, 0.4)
 
-    return results
+    return results[0]
 
 
 class Image(APIView):
@@ -75,7 +81,7 @@ class Image(APIView):
     def post(self, request, *args, **kwargs):
 
         if 'identification_number' not in request.data:
-            return Response({"status": "Failed", "message": "Identification Number Missing", "code" : "01"},
+            return Response({"status": "Failed", "message": "Identification Number Missing", "code": "01"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if 'current_image' not in request.FILES:
@@ -83,7 +89,14 @@ class Image(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         result = compare_images(self, request=request)
-        if not result:
-            return Response({"status": "Failed", "message": "Base Image Missing",  "code": "03"}, status=status.HTTP_400_BAD_REQUEST)
+        if result == 'MISSING BASE IMAGE':
+            return Response({"status": "Failed", "message": "Base Image Missing", "code": "03"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        elif result == 'MISSING FACE IN BASE IMAGE':
+            return Response({"status": "Failed", "message": "Missing Face In Base Image", "code": "04"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        elif result == 'MISSING FACE IN CURRENT IMAGE':
+            return Response({"status": "Failed", "message": "Missing Face In Current Image", "code": "05"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": result[0]}, status=status.HTTP_202_ACCEPTED)
+        return Response({"success": result}, status=status.HTTP_202_ACCEPTED)
