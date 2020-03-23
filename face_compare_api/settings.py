@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'face_compare_api.wsgi.application'
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgres://akbar:P@ssw0rd@localhost:5432/covid_face", conn_max_age=600
+        default="postgres://bgurung:f1ghtC0vid@localhost:5432/covid_face", conn_max_age=600
     )
 }
 
