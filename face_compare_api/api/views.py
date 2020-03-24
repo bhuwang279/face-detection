@@ -107,34 +107,34 @@ class Image(APIView):
     def post(self, request, *args, **kwargs):
 
         if 'identification_number' not in request.data:
-            return Response({"status": "Failed", "message": "Identification Number Missing", "code": "01"},
+            return Response({"status": False, "message": "Identification Number Missing", "code": "01"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if 'current_image' not in request.FILES:
-            return Response({"status": "Failed", "message": "Current Image Missing", "code": "02"},
+            return Response({"status": False, "message": "Current Image Missing", "code": "02"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if not request.FILES['current_image'].name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            return Response({"status": "Failed", "message": "Current Image is Invalid File", "code": "09"},
+            return Response({"status": False, "message": "Current Image is Invalid File", "code": "09"},
                      status=status.HTTP_400_BAD_REQUEST)
 
         if not request.FILES['base_image'].name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            return Response({"status": "Failed", "message": "Base Image is Invalid File", "code": "08"},
+            return Response({"status": False, "message": "Base Image is Invalid File", "code": "08"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         result = compare_images(self, request=request)
         if result == 'MISSING BASE IMAGE':
-            return Response({"status": "Failed", "message": "Base Image Missing", "code": "03"},
+            return Response({"status": False, "message": "Base Image Missing", "code": "03"},
                             status=status.HTTP_400_BAD_REQUEST)
         elif result == 'MISSING FACE IN BASE IMAGE':
-            return Response({"status": "Failed", "message": "Missing Face In Base Image", "code": "04"},
+            return Response({"status": False, "message": "Missing Face In Base Image", "code": "04"},
                             status=status.HTTP_400_BAD_REQUEST)
         elif result == 'MISSING FACE IN CURRENT IMAGE':
-            return Response({"status": "Failed", "message": "Missing Face In Current Image", "code": "05"},
+            return Response({"status": False, "message": "Missing Face In Current Image", "code": "05"},
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-        return Response({"success": result, "code": "00"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"status": result,"message": "Successful", "code": "00"}, status=status.HTTP_202_ACCEPTED)
 
 
 class Register(APIView):
@@ -142,15 +142,15 @@ class Register(APIView):
     def post(self, request, *args, **kwargs):
 
         if 'identification_number' not in request.data:
-            return Response({"status": "Failed", "message": "Identification Number Missing", "code": "01"},
+            return Response({"status": False, "message": "Identification Number Missing", "code": "01"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if 'base_image' not in request.FILES:
-            return Response({"status": "Failed", "message": "Base Image Missing", "code": "03"},
+            return Response({"status":False, "message": "Base Image Missing", "code": "03"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if not request.FILES['base_image'].name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            return Response({"status": "Failed", "message": "Current Image is Invalid File", "code": "08"},
+            return Response({"status": False, "message": "Current Image is Invalid File", "code": "08"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         image_detail = get_image_details(request.data.get("identification_number"))
@@ -160,18 +160,18 @@ class Register(APIView):
         if image_detail is None:
             encoding = base_image_encoding(request.FILES['base_image'])
             if encoding == 'MISSING FACE IN BASE IMAGE':
-                return Response({"status": "Failed", "message": "Missing Face In Base Image", "code": "04"},
+                return Response({"status": False, "message": "Missing Face In Base Image", "code": "04"},
                                 status=status.HTTP_400_BAD_REQUEST)
             try:
                 save_base_image(request, encoding)
             except Exception:
-                return Response({"status": "Failed", "message": "Save Image Error", "code": "06"},
+                return Response({"status": False, "message": "Save Image Error", "code": "06"},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"status": "Failed", "message": "Image Already Registered", "code": "07"},
+            return Response({"status": False, "message": "Image Already Registered", "code": "07"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": True}, status=status.HTTP_202_ACCEPTED)
+        return Response({"status": True,"message": "Image  Registered", "code": "00"}, status=status.HTTP_202_ACCEPTED)
 
 
 class Verify(APIView):
@@ -179,27 +179,27 @@ class Verify(APIView):
     def post(self, request, *args, **kwargs):
 
         if 'identification_number' not in request.data:
-            return Response({"status": "Failed", "message": "Identification Number Missing", "code": "01"},
+            return Response({"status": False, "message": "Identification Number Missing", "code": "01"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if 'current_image' not in request.FILES:
-            return Response({"status": "Failed", "message": "Current Image Missing", "code": "02"},
+            return Response({"status": False, "message": "Current Image Missing", "code": "02"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if not request.FILES['current_image'].name.lower().endswith(('.png', '.jpg', '.jpeg')):
-            return Response({"status": "Failed", "message": "Current Image is Invalid File", "code": "09"},
+            return Response({"status": False, "message": "Current Image is Invalid File", "code": "09"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         image_detail = get_image_details(request.data.get("identification_number"))
 
         if image_detail is None:
-            return Response({"status": "Failed", "message": "Image Is Not  Registered", "code": "08"},
+            return Response({"status": False, "message": "Image Is Not  Registered", "code": "08"},
                             status=status.HTTP_400_BAD_REQUEST)
 
         else:
             res = compare_with_saved_encoding(request.FILES['current_image'],pickle.loads(image_detail.image_encoding))
             if res == 'MISSING FACE IN CURRENT IMAGE':
-                return Response({"status": "Failed", "message": "Missing Face In Current Image", "code": "05"},
+                return Response({"status": False, "message": "Missing Face In Current Image", "code": "05"},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": True}, status=status.HTTP_202_ACCEPTED)
+        return Response({"status": True,"message": "Image Verified", "code": "00"}, status=status.HTTP_202_ACCEPTED)
