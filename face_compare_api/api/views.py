@@ -203,5 +203,8 @@ class Verify(APIView):
             if res == 'MISSING FACE IN CURRENT IMAGE':
                 return Response({"status": False, "message": "Missing Face In Current Image", "code": "05"},
                                 status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"status": result,"message": "Image Verified", "code": "00"}, status=status.HTTP_202_ACCEPTED)
+            elif not res:
+                return Response({"status": result,"message": "Image Verification Failed", "code": "11"}, status=status.HTTP_202_ACCEPTED)
+            else:
+                return Response({"status": result, "message": "Image Verified", "code": "00"},
+                                status=status.HTTP_202_ACCEPTED)
